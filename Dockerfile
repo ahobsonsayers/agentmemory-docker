@@ -32,3 +32,4 @@ USER agent
 EXPOSE 3111 3112
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/root/.bun/bin/agentmemory"]
+
