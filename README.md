@@ -31,7 +31,8 @@ services:
     restart: unless-stopped
 ```
 
-> **Note:** Create the `./data` directory on the host before running to prevent permission issues.
+> [!important]
+> Create the `./data` directory on the host before running to prevent permission issues.
 
 ## Configuration
 
