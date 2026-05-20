@@ -1,16 +1,16 @@
 # agentmemory-docker
 
-A lightweight docker image that makes it simple and quick to setup and run [agentmemory](https://github.com/rohitg00/agentmemory)
+A lightweight Docker image that makes it quick and easy to set up and run [agentmemory](https://github.com/rohitg00/agentmemory).
 
 ## Why
 
-[agentmemory](https://github.com/rohitg00/agentmemory) is a great tool to provide persistent memory so it remembers everything.
+[agentmemory](https://github.com/rohitg00/agentmemory) is an excellent tool for providing persistent memory to your AI agents. 
 
-However at the moment it requires you to install it with npm to use it, or deploy it to a hosted service like railway.
+Currently however, using it requires you to install it via npm or deploy it to a hosted service like Railway. I prefer to spin up services like this in a Docker container, whether locally or on a server - doing so significantly simplifies the deployment process and provides a standard interface across environments. 
 
-My preference is different from this - for a service like this I want to be able to spin it up in a docker container, either on my local machine or my server. This simplifies and unifies the run process significantly, and allows for a common interface. Sadly agentmemory does not have a official image published to dockerhub, so I cannot easily do this 😔
+Unfortunately, agentmemory doesn't currently publish an official image to Docker Hub 😔. 
 
-I built this image to fill that gap - a consistently up to date and tagged docker image for agentmemory - rebuilt automatically for each version and pushed to dockerhub 🐋
+I built this project to fill that gap. It provides a consistently up-to-date, tagged Docker image for agentmemory that is automatically rebuilt for each release and pushed to Docker Hub 🐋.
 
 ## Running
 
@@ -18,7 +18,7 @@ I built this image to fill that gap - a consistently up to date and tagged docke
 docker run -d -p 3111:3111 -v ./data:/data arranhs/agentmemory:latest
 ```
 
-Or with docker compose:
+Or with Docker Compose:
 
 ```yaml
 services:
@@ -32,13 +32,13 @@ services:
 ```
 
 > [!important]
-> Create the `./data` directory on the host before running to prevent permission issues.
+> Create the `./data` directory on the host machine before running the container to prevent permission issues.
 
 ## Configuration
 
-To enable authentication set `AGENTMEMORY_SECRET`.
+To enable authentication, set the `AGENTMEMORY_SECRET` environment variable.
 
-You can create a token with:
+You can securely generate a token with:
 
 ```bash
 openssl rand -hex 32
@@ -46,7 +46,7 @@ openssl rand -hex 32
 
 ## Environment Variables
 
-This is just a selection of relevant environment variables. Some that do not apply have been omitted.
+Below is a selection of the most relevant environment variables for this Docker image. A few variables that do not apply to this containerized setup have been omitted.
 
 ### Authentication & Security
 
