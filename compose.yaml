@@ -1,0 +1,10 @@
+services:
+  agentmemory:
+    container_name: agentmemory
+    image: arranhs/agentmemory:latest
+    command: agentmemory
+    restart: unless-stopped
+    ports:
+      - 3111:3111
+    volumes:
+      - ./data:/data
