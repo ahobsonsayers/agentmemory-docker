@@ -8,7 +8,7 @@ A lightweight docker image that makes it simple and quick to setup and run [agen
 
 However at the moment it requires you to install it with npm to use it, or deploy it to a hosted service like railway.
 
-My preference is different from this - for a service like this I want to be able to spin it up in a docker container, either on my local machine or my server. This simplifies and unifies the run process significantly, and allows for a coming interface. Sadly agentmemory does not have a official image published to dockerhub, so I cannot easily do this 😩
+My preference is different from this - for a service like this I want to be able to spin it up in a docker container, either on my local machine or my server. This simplifies and unifies the run process significantly, and allows for a common interface. Sadly agentmemory does not have a official image published to dockerhub, so I cannot easily do this 😔
 
 I built this image to fill that gap - a consistently up to date and tagged docker image for agentmemory - rebuilt automatically for each version and pushed to dockerhub 🐋
 
@@ -36,14 +36,12 @@ services:
 
 ## Configuration
 
-The image is pre-configured to:
-- Bind to `0.0.0.0` (accessible from other containers/host)
-- Store data in `/data` (mounted from host)
+To enable authentication set `AGENTMEMORY_SECRET`.
 
-**Authentication** - Set `AGENTMEMORY_SECRET` to protect the API with a token:
+You can create a token with:
 
 ```bash
-docker run -d -p 3111:3111 -v ./data:/data -e AGENTMEMORY_SECRET=your-token arranhs/agentmemory:latest
+openssl rand -hex 32
 ```
 
 ## Environment Variables
