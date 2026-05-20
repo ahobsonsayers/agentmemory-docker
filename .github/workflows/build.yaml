@@ -1,4 +1,4 @@
-name: Build and push agentmemory image
+name: Build & Push
 
 on:
   push:
@@ -7,17 +7,12 @@ on:
     paths:
       - .github/workflows/build.yaml
       - Dockerfile
-      - iii-config.docker.yaml
-      - compose.yaml
   schedule:
     - cron: 0 2 * * *
   workflow_dispatch:
-    inputs:
-      image-name:
-        description: Docker image name
-        type: string
-        required: true
-        default: arranhs/agentmemory
+
+env:
+  DOCKER_IMAGE: arranhs/agentmemory
 
 jobs:
   get-tags:
@@ -90,7 +85,7 @@ jobs:
         with:
           context: .
           platforms: ${{ matrix.platform }}
-          tags: ${{ github.event.inputs.image-name || 'arranhs/agentmemory' }}
+          tags: ${{ env.DOCKER_IMAGE }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           outputs: type=image,push-by-digest=true,name-canonical=true,push=true
@@ -131,7 +126,7 @@ jobs:
       - name: Push tags
         id: push-tags
         run: |
-          IMAGE_NAME="${{ github.event.inputs.image-name || 'arranhs/agentmemory' }}"
+          IMAGE_NAME="${{ env.DOCKER_IMAGE }}"
           TAGS_INPUT="${{ needs.get-tags.outputs.tags }}"
 
           TAGS_FLAGS=""
