@@ -34,6 +34,7 @@ RUN useradd agent --uid 1000 && \
 
 USER agent
 
-EXPOSE 3111 3113 # API and UI
+# API and UI
+EXPOSE 3111 3113
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/root/.bun/bin/agentmemory"]
