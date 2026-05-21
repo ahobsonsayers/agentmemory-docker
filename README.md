@@ -8,7 +8,7 @@ A lightweight Docker image that makes it quick and easy to set up and run [agent
 
 Currently however, using it requires you to install it via npm or deploy it to a hosted service like Railway. I prefer to spin up services like this in a Docker container, whether locally or on a server - doing so significantly simplifies the deployment process and provides a standard interface across environments. 
 
-Unfortunately, agentmemory doesn't currently publish an official image to Docker Hub 😔. 
+Unfortunately, agentmemory doesn't currently publish an official image to Docker Hub so I cannot do this 😔 
 
 I built this project to fill that gap. It provides a consistently up-to-date, tagged Docker image for agentmemory that is automatically rebuilt for each release and pushed to Docker Hub 🐋.
 
