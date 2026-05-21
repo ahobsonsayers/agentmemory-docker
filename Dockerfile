@@ -9,6 +9,7 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
+    git \
     tini && \
     rm -rf /var/lib/apt/lists/*
 
@@ -20,8 +21,12 @@ RUN ln -s /usr/local/bin/bun /usr/local/bin/node
 
 RUN bun install -g @agentmemory/agentmemory@${AGENTMEMORY_VERSION} --no-optional
 
-RUN sed -i 's|host: 127.0.0.1|host: 0.0.0.0|g' /root/.bun/install/global/node_modules/@agentmemory/agentmemory/dist/iii-config.yaml && \
-    sed -i 's|file_path: ./data/|file_path: /data/|g' /root/.bun/install/global/node_modules/@agentmemory/agentmemory/dist/iii-config.yaml
+COPY patches /tmp/patches
+
+RUN AGENTMEMORY_DIR="/root/.bun/install/global/node_modules/@agentmemory/agentmemory/dist" && \
+    cp "$AGENTMEMORY_DIR/iii-config.docker.yaml" "$AGENTMEMORY_DIR/iii-config.yaml" && \
+    git apply /tmp/patches/bind-all.patch && \
+    rm -rf /tmp/patches
 
 RUN useradd agent --uid 1000 && \
     mkdir -p /data && \
@@ -29,7 +34,6 @@ RUN useradd agent --uid 1000 && \
 
 USER agent
 
-EXPOSE 3111 3112
+EXPOSE 3111 3113 # API and UI
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/root/.bun/bin/agentmemory"]
-
