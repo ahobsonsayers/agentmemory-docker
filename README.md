@@ -15,7 +15,7 @@ I built this project to fill that gap. It provides a consistently up-to-date, ta
 ## Running
 
 ```bash
-docker run -d -p 3111:3111 -v ./data:/data arranhs/agentmemory:latest
+docker run -d -p 3111:3111 -p 3113:3113 -v ./data:/data arranhs/agentmemory:latest
 ```
 
 Or with Docker Compose:
@@ -24,12 +24,18 @@ Or with Docker Compose:
 services:
   agentmemory:
     image: arranhs/agentmemory:latest
+    restart: unless-stopped
     ports:
-      - 3111:3111
+      - 3111:3111 # API
+      - 3113:3113 # UI
     volumes:
       - ./data:/data
-    restart: unless-stopped
 ```
+
+| Port | Service |
+|------|---------|
+| 3111 | API |
+| 3113 | UI |
 
 > [!important]
 > Create the `./data` directory on the host machine before running the container to prevent permission issues.

@@ -5,6 +5,7 @@ services:
     command: agentmemory
     restart: unless-stopped
     ports:
-      - 3111:3111
+      - 3111:3111 # API
+      - 3113:3113 # UI
     volumes:
       - ./data:/data
