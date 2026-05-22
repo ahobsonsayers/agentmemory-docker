@@ -16,11 +16,25 @@ We build agentmemory from scratch with a couple of minor patches (see [./patches
 
 ## Running
 
+Create the data volume first:
+
 ```bash
-docker run -d -p 3111:3111 -p 3113:3113 -v ./data:/data arranhs/agentmemory:latest
+docker volume create agentmemory-data
+```
+
+Then run:
+
+```bash
+docker run -d -p 3111:3111 -p 3113:3113 -v agentmemory-data:/data arranhs/agentmemory:latest
 ```
 
 Or with Docker Compose:
+
+```bash
+docker compose up -d
+```
+
+where your compose looks like the below or [./compose.yaml](./compose.yaml)
 
 ```yaml
 services:
@@ -31,16 +45,16 @@ services:
       - 3111:3111 # API
       - 3113:3113 # UI
     volumes:
-      - ./data:/data
+      - agentmemory-data:/data
+
+volumes:
+  agentmemory-data:
 ```
 
 | Port | Service |
 |------|---------|
 | 3111 | API |
 | 3113 | UI |
-
-> [!important]
-> Create the `./data` directory on the host machine before running the container to prevent permission issues.
 
 ## Configuration
 

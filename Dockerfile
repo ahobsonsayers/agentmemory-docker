@@ -63,6 +63,8 @@ COPY --chown=65532:65532 --from=data-image /data /data
 
 USER 65532
 
+VOLUME /data
+
 # Expose ports:
 # 3111 = API
 # 3112 = Streams
