@@ -21,12 +21,10 @@ RUN ln -s /usr/local/bin/bun /usr/local/bin/node
 
 RUN bun install -g @agentmemory/agentmemory@${AGENTMEMORY_VERSION} --no-optional
 
-COPY patches /tmp/patches
-
-RUN AGENTMEMORY_DIR="/root/.bun/install/global/node_modules/@agentmemory/agentmemory/dist" && \
-    cp "$AGENTMEMORY_DIR/iii-config.docker.yaml" "$AGENTMEMORY_DIR/iii-config.yaml" && \
-    git apply /tmp/patches/bind-all.patch && \
-    rm -rf /tmp/patches
+RUN AGENTMEMORY_DIR="/root/.bun/install/global/node_modules/@agentmemory/agentmemory" && \
+    cp "$AGENTMEMORY_DIR/dist/iii-config.docker.yaml" "$AGENTMEMORY_DIR/dist/iii-config.yaml" && \
+    sed -i 's/server.listen(currentPort, "127.0.0.1");/server.listen(currentPort, "0.0.0.0");/g' "$AGENTMEMORY_DIR/dist/index.mjs" && \
+    sed -i 's/if (!isHostAllowed(req.headers.host, allowedHosts)) {/if (false) { \/\/ bind-all/g' "$AGENTMEMORY_DIR/dist/index.mjs"
 
 RUN useradd agent --uid 1000 && \
     mkdir -p /data && \
