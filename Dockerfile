@@ -1,38 +1,72 @@
 ARG AGENTMEMORY_VERSION=0.9.21
 ARG III_VERSION=0.11.2
 
-FROM iiidev/iii:${III_VERSION} AS iii-image
+#####################
+# tini image
+#####################
+FROM debian:stable-slim AS tini-image
 
-FROM debian:stable-slim
-
+# Install tini 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    ca-certificates \
-    curl \
-    git \
-    tini && \
-    rm -rf /var/lib/apt/lists/*
+    tini
 
+#####################
+# iii image
+#####################
+FROM iiidev/iii:${III_VERSION} AS iii-image
+
+#####################
+# Data image
+#####################
+FROM debian:stable-slim AS data-image
+
+# Create empty data directory 
+RUN mkdir -p /data
+
+#####################
+# Builder image
+#####################
+FROM node:26 AS builder
+
+ARG AGENTMEMORY_VERSION
+
+WORKDIR /app
+
+COPY patches /tmp/patches
+
+RUN git clone --depth 1 --branch v${AGENTMEMORY_VERSION} \
+      https://github.com/rohitg00/agentmemory . && \
+    git apply /tmp/patches/bind-all-interfaces.patch && \
+    npm install --ignore-scripts --legacy-peer-deps && \
+    npm run build && \
+    cp iii-config.docker.yaml dist/iii-config.yaml
+
+#####################
+# Distribution image
+#####################
+FROM gcr.io/distroless/nodejs26-debian13
+
+# Add dependencies
+COPY --from=tini-image /usr/bin/tini /usr/local/bin/tini
 COPY --from=iii-image /app/iii /usr/local/bin/iii
 
-COPY --from=oven/bun:debian /usr/local/bin/bun /usr/local/bin/bunx /usr/local/bin/
+WORKDIR /app
 
-RUN ln -s /usr/local/bin/bun /usr/local/bin/node
+# Add agentmemory
+COPY --chown=nonroot:nonroot --from=builder /app/package.json ./package.json
+COPY --chown=nonroot:nonroot --from=builder /app/dist ./dist
+COPY --chown=nonroot:nonroot --from=builder /app/node_modules ./node_modules
 
-RUN bun install -g @agentmemory/agentmemory@${AGENTMEMORY_VERSION} --no-optional
+# Add data folder
+COPY --chown=nonroot:nonroot --from=data-image /data /data
 
-RUN AGENTMEMORY_DIR="/root/.bun/install/global/node_modules/@agentmemory/agentmemory" && \
-    cp "$AGENTMEMORY_DIR/dist/iii-config.docker.yaml" "$AGENTMEMORY_DIR/dist/iii-config.yaml" && \
-    sed -i 's/server.listen(currentPort, "127.0.0.1");/server.listen(currentPort, "0.0.0.0");/g' "$AGENTMEMORY_DIR/dist/index.mjs" && \
-    sed -i 's/if (!isHostAllowed(req.headers.host, allowedHosts)) {/if (false) { \/\/ bind-all/g' "$AGENTMEMORY_DIR/dist/index.mjs"
+USER nonroot
 
-RUN useradd agent --uid 1000 && \
-    mkdir -p /data && \
-    chown -R agent:agent /data /root
+# Expose ports:
+# 3111 = API
+# 3112 = Streams
+# 3113 = UI
+EXPOSE 3111 3112 3113
 
-USER agent
-
-# API and UI
-EXPOSE 3111 3113
-
-ENTRYPOINT ["/usr/bin/tini", "--", "/root/.bun/bin/agentmemory"]
+ENTRYPOINT ["tini", "--", "/nodejs/bin/node", "./dist/cli.mjs"]
