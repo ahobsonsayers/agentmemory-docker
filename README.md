@@ -6,11 +6,13 @@ A lightweight Docker image that makes it quick and easy to set up and run [agent
 
 [agentmemory](https://github.com/rohitg00/agentmemory) is an excellent tool for providing persistent memory to your AI agents. 
 
-Currently however, using it requires you to install it via npm or deploy it to a hosted service like Railway. I prefer to spin up services like this in a Docker container, whether locally or on a server - doing so significantly simplifies the deployment process and provides a standard interface across environments. 
+Currently however, using it requires installing it locally via npm or deploying it to a hosted service like Railway. I prefer to spin up services like this in a Docker container, whether locally or on a server, as doing so significantly simplifies the deployment process and provides a standard interface across environments. 
 
-Unfortunately, agentmemory doesn't currently publish an official image to Docker Hub so I cannot do this 😔 
+Unfortunately, agentmemory doesn't currently publish an official docker image, so I cannot do this 😔 
 
-I built this project to fill that gap. It provides a consistently up-to-date, tagged Docker image for agentmemory that is automatically rebuilt for each release and pushed to Docker Hub 🐋.
+I built this project to fill that gap. It provides a consistently up-to-date, tagged Docker image for agentmemory that is automatically rebuilt for each release and pushed to Docker Hub 🐋
+
+We build agentmemory from scratch with a couple of minor patches (see [./patches](./patches)) so that it works in properly in docker, and so the final image is lightweight.
 
 ## Running
 
