@@ -54,14 +54,14 @@ COPY --from=iii-image /app/iii /usr/local/bin/iii
 WORKDIR /app
 
 # Add agentmemory
-COPY --chown=nonroot:nonroot --from=builder /app/package.json ./package.json
-COPY --chown=nonroot:nonroot --from=builder /app/dist ./dist
-COPY --chown=nonroot:nonroot --from=builder /app/node_modules ./node_modules
+COPY --chown=65532:65532 --from=builder /app/package.json ./package.json
+COPY --chown=65532:65532 --from=builder /app/dist ./dist
+COPY --chown=65532:65532 --from=builder /app/node_modules ./node_modules
 
 # Add data folder
-COPY --chown=nonroot:nonroot --from=data-image /data /data
+COPY --chown=65532:65532 --from=data-image /data /data
 
-USER nonroot
+USER 65532
 
 # Expose ports:
 # 3111 = API
