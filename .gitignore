@@ -1,0 +1,6 @@
+# Ignore certain directories
+agentmemory/
+data/
+
+# Ignore certain files
+.env
