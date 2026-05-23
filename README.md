@@ -80,19 +80,13 @@ Below is the full list of environment variables for this Docker image. A few var
 
 | Variable | Description | Default |
 |---|---|---|
-| **Consolidation** |||
 | `CONSOLIDATION_ENABLED` | Run 4-tier consolidation pipeline | `false` |
 | `CONSOLIDATION_DECAY_DAYS` | Days before memory decay | `30` |
-| **Graph Extraction** |||
 | `GRAPH_EXTRACTION_ENABLED` | Extract knowledge graph edges | `false` |
 | `GRAPH_EXTRACTION_BATCH_SIZE` | Memories per graph-extraction batch | `8` |
-| **Context Injection** |||
 | `AGENTMEMORY_INJECT_CONTEXT` | Inject recalled memories into agent prompts | `false` |
-| **Auto Compression** |||
 | `AGENTMEMORY_AUTO_COMPRESS` | Run LLM compression on every observation | `false` |
-| **Reflection** |||
 | `AGENTMEMORY_REFLECT` | Auto-synthesize lessons from memories | `false` |
-| **Other** |||
 | `AGENTMEMORY_IMAGE_EMBEDDINGS` | Enable image embeddings | `false` |
 | `AGENTMEMORY_DROP_STALE_INDEX` | Drop stale BM25 / vector index on startup | `false` |
 
@@ -100,68 +94,51 @@ Below is the full list of environment variables for this Docker image. A few var
 
 | Variable | Description | Default |
 |---|---|---|
-| **OpenAI** |||
 | `OPENAI_BASE_URL` | OpenAI base URL | `https://api.openai.com` |
 | `OPENAI_API_KEY` | OpenAI API key | - |
 | `OPENAI_MODEL` | OpenAI model for completions | `gpt-4o-mini` |
 | `OPENAI_TIMEOUT_MS` | OpenAI timeout (ms) | `60000` |
-| **Anthropic** |||
 | `ANTHROPIC_BASE_URL` | Anthropic base URL | `https://api.anthropic.com` |
 | `ANTHROPIC_API_KEY` | Anthropic API key | - |
 | `ANTHROPIC_MODEL` | Default Anthropic model | `claude-sonnet-4-20250514` |
-| **Gemini** |||
 | `GEMINI_API_KEY` | Gemini API key | - |
 | `GOOGLE_API_KEY` | Alias for GEMINI_API_KEY | - |
 | `GEMINI_MODEL` | Default Gemini model | `gemini-2.5-flash` |
-| **MiniMax** |||
 | `MINIMAX_API_KEY` | Minimax API key | - |
 | `MINIMAX_MODEL` | Default Minimax model | `MiniMax-M2.7` |
-| **OpenRouter** |||
 | `OPENROUTER_API_KEY` | OpenRouter API key | - |
 | `OPENROUTER_MODEL` | Default OpenRouter model | `anthropic/claude-sonnet-4-20250514` |
-| **Fallback** |||
 | `FALLBACK_PROVIDERS` | Comma-separated fallback chain | - |
 
 ### LLM Settings
 
 | Variable | Description | Default |
 |---|---|---|
-| **Tokens & Timeout** |||
 | `MAX_TOKENS` | Max LLM completion tokens | `4096` |
 | `AGENTMEMORY_LLM_TIMEOUT_MS` | LLM / embedding timeout (ms) | `60000` |
-| **Agent SDK** |||
 | `AGENTMEMORY_ALLOW_AGENT_SDK` | Allow Claude SDK fallback | `false` |
 
 ### Embedding Provider
 
 | Variable | Description | Default |
 |---|---|---|
-| **Provider** |||
 | `EMBEDDING_PROVIDER` | Embedding provider | `` local \| openai \| voyage \| cohere \| gemini \| openrouter `` |
-| **OpenAI** |||
 | `OPENAI_EMBEDDING_MODEL` | Embedding model (openai) | `text-embedding-3-small` |
 | `OPENAI_EMBEDDING_DIMENSIONS` | Embedding dimensions | `1536` |
-| **Gemini** |||
 | `GEMINI_API_KEY` | Gemini API key | - |
-| **Cohere** |||
 | `COHERE_API_KEY` | Cohere API key | - |
-| **Voyage** |||
 | `VOYAGE_API_KEY` | Voyage AI API key | - |
-| **OpenRouter** |||
 | `OPENROUTER_EMBEDDING_MODEL` | Embedding model (openrouter) | `openai/text-embedding-3-small` |
 
 ### Search Tuning
 
 | Variable | Description | Default |
 |---|---|---|
-| **Hybrid Weights** |||
 | `BM25_WEIGHT` | Hybrid search weight for BM25 | `0.4` |
 | `VECTOR_WEIGHT` | Hybrid search weight for vector | `0.6` |
 | `AGENTMEMORY_GRAPH_WEIGHT` | Graph traversal bonus | `0.2` |
-| **Token Budget** |||
 | `TOKEN_BUDGET` | Max tokens injected per session | `2000` |
 | `MAX_OBS_PER_SESSION` | Per-session observation cap | `500` |
-| **Summarization** |||
 | `SUMMARIZE_CHUNK_SIZE` | Chunk size for summarize | `400` |
 | `SUMMARIZE_CHUNK_CONCURRENCY` | Parallel chunk LLM calls | `6` |
 
@@ -181,16 +158,12 @@ configure your client.
 
 | Variable | Description | Default |
 |---|---|---|
-| **Connection** |||
 | `AGENTMEMORY_URL` | REST base URL | `http://localhost:3111` |
 | `AGENTMEMORY_VIEWER_URL` | Viewer URL override | `http://localhost:3113` |
-| **Tools** |||
 | `AGENTMEMORY_TOOLS` | Tools exposed to MCP clients | `` core \| all `` |
 | `AGENTMEMORY_SLOTS` | Comma-separated plugin slots | `memory` |
-| **Proxy** |||
 | `AGENTMEMORY_FORCE_PROXY` | Skip MCP shim livez probe | `false` |
 | `AGENTMEMORY_PROBE_TIMEOUT_MS` | MCP shim livez probe timeout (ms) | `2000` |
-| **Debug** |||
 | `AGENTMEMORY_DEBUG` | Trace MCP shim to stderr | `false` |
 
 ### Integrations
