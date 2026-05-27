@@ -38,7 +38,7 @@ COPY patches /tmp/patches
 RUN git clone --depth 1 --branch v${AGENTMEMORY_VERSION} \
       https://github.com/rohitg00/agentmemory . && \
     git apply /tmp/patches/bind-all-interfaces.patch && \
-    npm install --ignore-scripts --legacy-peer-deps && \
+    npm install --ignore-scripts --legacy-peer-deps --include=optional && \
     npm run build && \
     cp iii-config.docker.yaml dist/iii-config.yaml
 
