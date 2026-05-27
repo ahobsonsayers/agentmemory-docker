@@ -84,7 +84,6 @@ Below is the full list of environment variables for this Docker image. A few var
 | `CONSOLIDATION_DECAY_DAYS` | Days before memory decay | `30` |
 | `GRAPH_EXTRACTION_ENABLED` | Extract knowledge graph edges | `false` |
 | `GRAPH_EXTRACTION_BATCH_SIZE` | Memories per graph-extraction batch | `8` |
-| `AGENTMEMORY_INJECT_CONTEXT` | Inject recalled memories into agent prompts | `false` |
 | `AGENTMEMORY_AUTO_COMPRESS` | Run LLM compression on every observation | `false` |
 | `AGENTMEMORY_REFLECT` | Auto-synthesize lessons from memories | `false` |
 | `AGENTMEMORY_IMAGE_EMBEDDINGS` | Enable image embeddings | `false` |
@@ -97,7 +96,6 @@ Below is the full list of environment variables for this Docker image. A few var
 | `OPENAI_BASE_URL` | OpenAI base URL | `https://api.openai.com` |
 | `OPENAI_API_KEY` | OpenAI API key | - |
 | `OPENAI_MODEL` | OpenAI model for completions | `gpt-4o-mini` |
-| `OPENAI_TIMEOUT_MS` | OpenAI timeout (ms) | `60000` |
 | `ANTHROPIC_BASE_URL` | Anthropic base URL | `https://api.anthropic.com` |
 | `ANTHROPIC_API_KEY` | Anthropic API key | - |
 | `ANTHROPIC_MODEL` | Default Anthropic model | `claude-sonnet-4-20250514` |
@@ -115,8 +113,12 @@ Below is the full list of environment variables for this Docker image. A few var
 | Variable | Description | Default |
 |---|---|---|
 | `MAX_TOKENS` | Max LLM completion tokens | `4096` |
+| `OPENAI_API_KEY_FOR_LLM` | Separate key for LLM calls (vs embeddings) | - |
+| `OPENAI_REASONING_EFFORT` | Reasoning effort (low/medium/high/none) | - |
+| `OPENAI_TIMEOUT_MS` | OpenAI timeout (ms) | `60000` |
 | `AGENTMEMORY_LLM_TIMEOUT_MS` | LLM / embedding timeout (ms) | `60000` |
 | `AGENTMEMORY_ALLOW_AGENT_SDK` | Allow Claude SDK fallback | `false` |
+| `AGENTMEMORY_SUPPRESS_COST_WARNING` | Suppress OpenRouter premium model warning | `false` |
 
 ### Embedding Provider
 
@@ -166,6 +168,13 @@ configure your client.
 | `AGENTMEMORY_PROBE_TIMEOUT_MS` | MCP shim livez probe timeout (ms) | `2000` |
 | `AGENTMEMORY_DEBUG` | Trace MCP shim to stderr | `false` |
 
+### Runtime Options
+
+| Variable | Description | Default |
+|---|---|---|
+| `AGENTMEMORY_VERBOSE` | Enable verbose CLI output | `false` |
+| `AGENTMEMORY_INJECT_CONTEXT` | Inject context into conversation | `false` |
+
 ### Integrations
 
 | Variable | Description | Default |
@@ -193,3 +202,5 @@ configure your client.
 | `TEAM_MODE` | Team sharing mode | `` shared `` |
 | `TEAM_ID` | Team identifier | - |
 | `USER_ID` | User identifier | - |
+| `AGENT_ID` | Multi-agent memory isolation ID | - |
+| `AGENTMEMORY_AGENT_SCOPE` | Multi-agent scope mode | `` shared `` |
