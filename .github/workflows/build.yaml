@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - .github/workflows/build.yaml
+      - .github/workflows/update.yaml
       - Dockerfile
   workflow_dispatch:
 
