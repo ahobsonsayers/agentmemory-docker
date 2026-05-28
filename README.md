@@ -68,139 +68,161 @@ openssl rand -hex 32
 
 ## Environment Variables
 
-Below is the full list of environment variables for this Docker image. A few variables that do not apply to this containerized setup have been omitted.
+This Docker project deploys the AgentMemory **server**. 
 
-### Authentication & Security
+The variables below configure the backend runtime. Client-side variables (used by the CLI or MCP shims) are listed at the bottom purely for reference.
 
-| Variable | Description | Default |
+### Authentication
+
+| Variable | Default | Description |
 |---|---|---|
-| `AGENTMEMORY_SECRET` | Bearer token for REST API + viewer | - |
+| `AGENTMEMORY_SECRET` | - | Shared secret used to authenticate remote clients against this server. Set this for any non-local deployment. |
 
 ### Features
 
-| Variable | Description | Default |
+| Variable | Default | Description |
 |---|---|---|
-| `CONSOLIDATION_ENABLED` | Run 4-tier consolidation pipeline | `false` |
-| `CONSOLIDATION_DECAY_DAYS` | Days before memory decay | `30` |
-| `GRAPH_EXTRACTION_ENABLED` | Extract knowledge graph edges | `false` |
-| `GRAPH_EXTRACTION_BATCH_SIZE` | Memories per graph-extraction batch | `8` |
-| `AGENTMEMORY_AUTO_COMPRESS` | Run LLM compression on every observation | `false` |
-| `AGENTMEMORY_REFLECT` | Auto-synthesize lessons from memories | `false` |
-| `AGENTMEMORY_IMAGE_EMBEDDINGS` | Enable image embeddings | `false` |
-| `AGENTMEMORY_DROP_STALE_INDEX` | Drop stale BM25 / vector index on startup | `false` |
+| `AGENTMEMORY_TOOLS` | `all` | `core` or `all` — the tool surface exposed to MCP clients. |
+| `AGENTMEMORY_AUTO_COMPRESS` | `false` | Run LLM compression on every observation batch to generate memories. |
+| `AGENTMEMORY_REFLECT` | `false` | Periodically auto-synthesize lessons and insights from memories. |
+| `CONSOLIDATION_ENABLED` | `false` | Run the 4-tier consolidation pipeline (memories → semantic → procedural). |
+| `CONSOLIDATION_DECAY_DAYS` | `30` | Age (days) after which non-reinforced memories decay. |
+| `LESSON_DECAY_ENABLED` | `true` | Daily decay sweep of unreinforced, low-confidence lessons. |
+| `GRAPH_EXTRACTION_ENABLED` | `false` | Extract concept-graph edges on remember for graph-traversal recall. |
+| `GRAPH_EXTRACTION_BATCH_SIZE` | `8` | Memories per graph-extraction batch. |
+| `AGENTMEMORY_IMAGE_EMBEDDINGS` | `false` | Experimental: Enable image embeddings when an image provider is present. |
+| `AGENT_ID` | - | Optional identifier for multi-agent setups. |
+| `AGENTMEMORY_AGENT_SCOPE` | `shared` | Scope for multi-agent memory access; use `isolated` to scope recall to specific agents. |
+| `TEAM_MODE` | - | Team sharing mode (e.g., `shared`). |
+| `TEAM_ID` | - | Used alongside `TEAM_MODE` to scope memories to a specific team. |
+| `USER_ID` | - | Used alongside `TEAM_MODE` to scope memories to a specific user. |
 
-### LLM Provider
+### Model Providers
 
-| Variable | Description | Default |
+Provider keys are only required if you want to use external embeddings or if you enable LLM-dependent features (such as `AGENTMEMORY_AUTO_COMPRESS`, `AGENTMEMORY_REFLECT`, or `CONSOLIDATION_ENABLED`). 
+
+If no LLM keys are provided, AgentMemory disables LLM features and uses fast, zero-LLM "synthetic compression" instead.
+
+#### OpenAI
+| Variable | Default | Description |
 |---|---|---|
-| `OPENAI_BASE_URL` | OpenAI base URL | `https://api.openai.com` |
-| `OPENAI_API_KEY` | OpenAI API key | - |
-| `OPENAI_MODEL` | OpenAI model for completions | `gpt-4o-mini` |
-| `ANTHROPIC_BASE_URL` | Anthropic base URL | `https://api.anthropic.com` |
-| `ANTHROPIC_API_KEY` | Anthropic API key | - |
-| `ANTHROPIC_MODEL` | Default Anthropic model | `claude-sonnet-4-20250514` |
-| `GEMINI_API_KEY` | Gemini API key | - |
-| `GOOGLE_API_KEY` | Alias for GEMINI_API_KEY | - |
-| `GEMINI_MODEL` | Default Gemini model | `gemini-2.5-flash` |
-| `MINIMAX_API_KEY` | Minimax API key | - |
-| `MINIMAX_MODEL` | Default Minimax model | `MiniMax-M2.7` |
-| `OPENROUTER_API_KEY` | OpenRouter API key | - |
-| `OPENROUTER_MODEL` | Default OpenRouter model | `anthropic/claude-sonnet-4-20250514` |
-| `FALLBACK_PROVIDERS` | Comma-separated fallback chain | - |
+| `OPENAI_BASE_URL` | - | Base URL for any OpenAI-compatible API (vLLM, LM Studio, Ollama, DeepSeek, etc). |
+| `OPENAI_API_KEY` | - | Enables OpenAI-compatible embeddings and the OpenAI-compatible LLM path. |
+| `OPENAI_MODEL` | - | Model name for the OpenAI-compatible LLM provider. |
+| `OPENAI_API_KEY_FOR_LLM` | `true` | Set to `false` if using `OPENAI_API_KEY` for embeddings only. |
+| `OPENAI_REASONING_EFFORT` | - | Passed through to supported reasoning models. |
+| `OPENAI_API_VERSION` | - | Azure OpenAI API version. |
+| `OPENAI_TIMEOUT_MS` | `60000` | Legacy compatibility alias for `AGENTMEMORY_LLM_TIMEOUT_MS`. |
 
-### LLM Settings
-
-| Variable | Description | Default |
+#### Anthropic
+| Variable | Default | Description |
 |---|---|---|
-| `MAX_TOKENS` | Max LLM completion tokens | `4096` |
-| `OPENAI_API_KEY_FOR_LLM` | Separate key for LLM calls (vs embeddings) | - |
-| `OPENAI_REASONING_EFFORT` | Reasoning effort (low/medium/high/none) | - |
-| `OPENAI_TIMEOUT_MS` | OpenAI timeout (ms) | `60000` |
-| `AGENTMEMORY_LLM_TIMEOUT_MS` | LLM / embedding timeout (ms) | `60000` |
-| `AGENTMEMORY_ALLOW_AGENT_SDK` | Allow Claude SDK fallback | `false` |
-| `AGENTMEMORY_SUPPRESS_COST_WARNING` | Suppress OpenRouter premium model warning | `false` |
+| `ANTHROPIC_BASE_URL` | - | Override for Anthropic-compatible proxies / Azure AI Foundry. |
+| `ANTHROPIC_API_KEY` | - | Enables Anthropic features. |
+| `ANTHROPIC_MODEL` | `claude-sonnet-4-20250514` | Default Anthropic model. |
+| `AGENTMEMORY_ALLOW_AGENT_SDK` | `false` | Opt-in Claude-subscription fallback (spawns child sessions). |
 
-### Embedding Provider
-
-| Variable | Description | Default |
+#### Gemini
+| Variable | Default | Description |
 |---|---|---|
-| `EMBEDDING_PROVIDER` | Embedding provider | `` local \| openai \| voyage \| cohere \| gemini \| openrouter `` |
-| `OPENAI_EMBEDDING_MODEL` | Embedding model (openai) | `text-embedding-3-small` |
-| `OPENAI_EMBEDDING_DIMENSIONS` | Embedding dimensions | `1536` |
-| `GEMINI_API_KEY` | Gemini API key | - |
-| `COHERE_API_KEY` | Cohere API key | - |
-| `VOYAGE_API_KEY` | Voyage AI API key | - |
-| `OPENROUTER_EMBEDDING_MODEL` | Embedding model (openrouter) | `openai/text-embedding-3-small` |
+| `GEMINI_API_KEY` | - | Enables Gemini features. |
+| `GOOGLE_API_KEY` | - | Alias for `GEMINI_API_KEY`. |
+| `GEMINI_MODEL` | `gemini-2.5-flash` | Default Gemini model. |
+
+#### Voyage
+| Variable | Default | Description |
+|---|---|---|
+| `VOYAGE_API_KEY` | - | Voyage API key (optimised for code embeddings). |
+
+#### MiniMax
+| Variable | Default | Description |
+|---|---|---|
+| `MINIMAX_API_KEY` | - | Enables MiniMax provider. |
+| `MINIMAX_MODEL` | `MiniMax-M2.7` | Default MiniMax model. |
+
+#### OpenRouter
+| Variable | Default | Description |
+|---|---|---|
+| `OPENROUTER_API_KEY` | - | Enables OpenRouter features. |
+| `OPENROUTER_MODEL` | - | Default OpenRouter model. |
+
+#### General LLM Settings
+| Variable | Default | Description |
+|---|---|---|
+| `AGENTMEMORY_LLM_TIMEOUT_MS` | `60000` | Global timeout for LLM requests (in milliseconds). |
+| `MAX_TOKENS` | `4096` | Cap LLM completion tokens for compression / summarise calls. |
+| `FALLBACK_PROVIDERS` | - | Comma-separated chain tried after the primary provider returns an error (e.g., `anthropic,gemini`). |
+
+### Embeddings
+
+Embeddings are auto-detected based on the provider keys above. 
+
+If no compatible provider key is found, AgentMemory defaults to running a local CPU-based embedding model (`Xenova/all-MiniLM-L6-v2`, 384-dim). You can explicitly override the detection logic using the variables below.
+
+| Variable | Default | Description |
+|---|---|---|
+| `EMBEDDING_PROVIDER` | `local` | Override detection: `local`, `openai`, `gemini`, `cohere`, `voyage`, or `openrouter`. |
+| `OPENAI_EMBEDDING_MODEL` | `text-embedding-3-small` | Override the default OpenAI embedding model. |
+| `OPENAI_EMBEDDING_DIMENSIONS` | - | Explicitly set dimensions if using a non-standard OpenAI model (e.g., `1536`). |
+| `COHERE_API_KEY` | - | Cohere API key. |
+| `OPENROUTER_EMBEDDING_MODEL`| `openai/text-embedding-3-small` | Set when `EMBEDDING_PROVIDER=openrouter`. |
 
 ### Search Tuning
 
-| Variable | Description | Default |
+| Variable | Default | Description |
 |---|---|---|
-| `BM25_WEIGHT` | Hybrid search weight for BM25 | `0.4` |
-| `VECTOR_WEIGHT` | Hybrid search weight for vector | `0.6` |
-| `AGENTMEMORY_GRAPH_WEIGHT` | Graph traversal bonus | `0.2` |
-| `TOKEN_BUDGET` | Max tokens injected per session | `2000` |
-| `MAX_OBS_PER_SESSION` | Per-session observation cap | `500` |
-| `SUMMARIZE_CHUNK_SIZE` | Chunk size for summarize | `400` |
-| `SUMMARIZE_CHUNK_CONCURRENCY` | Parallel chunk LLM calls | `6` |
+| `MAX_OBS_PER_SESSION` | `500` | Per-session observation cap before consolidation kicks in. |
+| `TOKEN_BUDGET` | `2000` | Max tokens injected via context per session. |
+| `BM25_WEIGHT` | `0.4` | Hybrid search weight for BM25 leg. |
+| `VECTOR_WEIGHT` | `0.6` | Hybrid search weight for vector leg. |
+| `AGENTMEMORY_GRAPH_WEIGHT` | `0.2` | Graph traversal bonus on smart-search ranking. |
+| `SUMMARIZE_CHUNK_SIZE` | `400` | Chunk size (observations) when map-reducing large sessions. |
+| `SUMMARIZE_CHUNK_CONCURRENCY`| `6` | Parallel chunk LLM calls during chunked summarize. |
 
-### Project
+### Diagnostics, Recovery & Backups
 
-| Variable | Description | Default |
+| Variable | Default | Description |
 |---|---|---|
-| `AGENTMEMORY_PROJECT` | Project name for memory namespace | `default` |
+| `OBSIDIAN_AUTO_EXPORT` | `false` | Automatically mirror agent memories, rules and lessons to `~/.agentmemory/vault/` as linked Markdown notes. |
+| `SNAPSHOT_ENABLED` | `false` | Periodic snapshots of state_store and stream_store. |
+| `SNAPSHOT_DIR` | `~/.agentmemory/snapshots`| Path for state snapshots. |
+| `SNAPSHOT_INTERVAL` | `3600` | Seconds between snapshots. |
+| `AGENTMEMORY_DROP_STALE_INDEX` | `false` | Recovery flag for stale-index issues (drops BM25/vector index on startup). |
+| `REBUILD_EMBED_BATCH_SIZE` | `32` | Batch size used for embedding rebuild operations. |
+| `AGENTMEMORY_SUPPRESS_COST_WARNING` | `false` | Suppresses the warning shown for premium-cost OpenRouter model selections. |
 
-## CLI Only Environment Variables
+***
 
-The following environment variables are supported by the agentmemory CLI,
-and are not relevant to this image. You may however want to use them to
-configure your client.
+## Client Environment Variables
 
-### MCP Client
+These variables are for AgentMemory clients, MCP shims, or local CLI integrations communicating with the server. **They are not part of this server container's runtime configuration** and are listed here for reference.
 
-| Variable | Description | Default |
+### Connection
+
+| Variable | Default | Description |
 |---|---|---|
-| `AGENTMEMORY_URL` | REST base URL | `http://localhost:3111` |
-| `AGENTMEMORY_VIEWER_URL` | Viewer URL override | `http://localhost:3113` |
-| `AGENTMEMORY_TOOLS` | Tools exposed to MCP clients | `` core \| all `` |
-| `AGENTMEMORY_SLOTS` | Comma-separated plugin slots | `memory` |
-| `AGENTMEMORY_FORCE_PROXY` | Skip MCP shim livez probe | `false` |
-| `AGENTMEMORY_PROBE_TIMEOUT_MS` | MCP shim livez probe timeout (ms) | `2000` |
-| `AGENTMEMORY_DEBUG` | Trace MCP shim to stderr | `false` |
+| `AGENTMEMORY_URL` | `http://localhost:3111` | REST base URL a client uses to reach an AgentMemory server. |
+| `AGENTMEMORY_VIEWER_URL` | `http://localhost:3113` | Override the viewer URL printed by `agentmemory status`. |
+| `AGENTMEMORY_REQUIRE_HTTPS` | `false` | Safety check that refuses to send the secret over plain HTTP to non-loopback hosts. |
+| `AGENTMEMORY_PROBE_TIMEOUT_MS`| `2000` | MCP shim livez probe timeout. |
+| `AGENTMEMORY_FORCE_PROXY` | `false` | Skip the MCP shim livez probe and force direct proxying to `AGENTMEMORY_URL`. |
 
-### Runtime Options
+### Agent Integrations
 
-| Variable | Description | Default |
+| Variable | Default | Description |
 |---|---|---|
-| `AGENTMEMORY_VERBOSE` | Enable verbose CLI output | `false` |
-| `AGENTMEMORY_INJECT_CONTEXT` | Inject context into conversation | `false` |
+| `AGENTMEMORY_INJECT_CONTEXT` | `false` | Automatically injects recalled memory into agent flows on the client side. |
+| `AGENTMEMORY_SLOTS` | `memory` | Comma-separated plugin slot names the CLI should claim. |
+| `CLAUDE_MEMORY_BRIDGE` | `false` | Enables bi-directional sync with Claude Code's native `MEMORY.md`. |
+| `CLAUDE_MEMORY_LINE_BUDGET` | `200` | When `CLAUDE_MEMORY_BRIDGE` is true, configures the max lines allowed to be injected into `MEMORY.md`. |
+| `CLAUDE_PLUGIN_ROOT` | - | Used to specify the root directory for Claude Code plugins/hooks. |
 
-### Integrations
+### Miscellaneous
 
-| Variable | Description | Default |
+| Variable | Default | Description |
 |---|---|---|
-| `CLAUDE_MEMORY_BRIDGE` | Mirror memories into CLAUDE.md | `false` |
-| `CLAUDE_PROJECT_PATH` | Project path for CLAUDE.md | - |
-| `CLAUDE_MEMORY_LINE_BUDGET` | Lines of memory in CLAUDE.md | `200` |
-| `OBSIDIAN_AUTO_EXPORT` | Auto-export to Obsidian | `false` |
+| `STANDALONE_MCP` | `false` | Bypass the worker and run `@agentmemory/mcp` in-process. |
+| `STANDALONE_PERSIST_PATH` | `~/.agentmemory/local.db`| Path used by the standalone MCP shim's local fallback store. |
+| `AGENTMEMORY_EXPORT_ROOT` | `~/agentmemory-backup`| Default destination for `agentmemory export`. |
+| `AGENTMEMORY_DEBUG` | `false` | Trace MCP shim probe and fallback decisions. |
 
-### Storage & Export
-
-| Variable | Description | Default |
-|---|---|---|
-| `AGENTMEMORY_EXPORT_ROOT` | Default export path | `~/agentmemory-backup` |
-| `STANDALONE_MCP` | Run MCP shim in-process | - |
-| `STANDALONE_PERSIST_PATH` | Local fallback store path | `~/.agentmemory/local.db` |
-| `SNAPSHOT_ENABLED` | Enable periodic snapshots | `false` |
-| `SNAPSHOT_DIR` | Snapshot directory | `~/.agentmemory/snapshots` |
-| `SNAPSHOT_INTERVAL` | Seconds between snapshots | `3600` |
-
-### Team Sharing
-
-| Variable | Description | Default |
-|---|---|---|
-| `TEAM_MODE` | Team sharing mode | `` shared `` |
-| `TEAM_ID` | Team identifier | - |
-| `USER_ID` | User identifier | - |
-| `AGENT_ID` | Multi-agent memory isolation ID | - |
-| `AGENTMEMORY_AGENT_SCOPE` | Multi-agent scope mode | `` shared `` |
