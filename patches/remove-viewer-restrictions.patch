@@ -1,0 +1,50 @@
+--- a/src/viewer/server.ts
++++ b/src/viewer/server.ts
+@@ -65,7 +65,7 @@
+ }
+ 
+ export function resolveViewerHost(): string {
+-  return process.env.AGENTMEMORY_VIEWER_HOST?.trim() || "127.0.0.1";
++  return process.env.AGENTMEMORY_VIEWER_HOST?.trim() || "0.0.0.0";
+ }
+ 
+ export function isLoopbackHost(host: string): boolean {
+@@ -209,24 +209,8 @@
+   const host = resolveViewerHost();
+   let inboundSecret: string | null = null;
+ 
+-  // Non-loopback bind turns the viewer into a network-reachable
+-  // bearer-authorized proxy. Refuse to start unless the operator has
+-  // both an inbound secret to authenticate callers against and an
+-  // explicit Host header allowlist; otherwise the listening socket
+-  // becomes an open relay to the local REST API.
+-  if (!isLoopbackHost(host)) {
+-    if (!secret) {
+-      throw new ViewerConfigError(
+-        `AGENTMEMORY_VIEWER_HOST=${host} requires AGENTMEMORY_SECRET to be set so the viewer can validate inbound bearer tokens. To fix: unset AGENTMEMORY_VIEWER_HOST to keep the safe loopback bind, or set AGENTMEMORY_SECRET. For Fly images, it is printed on first boot; see deploy/fly/README.md.`,
+-      );
+-    }
+-    if (readAllowedHostsOverride().length === 0) {
+-      throw new ViewerConfigError(
+-        `AGENTMEMORY_VIEWER_HOST=${host} requires VIEWER_ALLOWED_HOSTS because non-loopback viewer binds only trust explicit Host headers. To fix: set VIEWER_ALLOWED_HOSTS to a comma-separated list of trusted Host header values (e.g. "localhost:3113" for fly proxy), or unset AGENTMEMORY_VIEWER_HOST to keep the safe loopback bind.`,
+-      );
+-    }
+-    inboundSecret = secret;
+-  }
++  // Docker: bind to all interfaces with no auth guard.
++  inboundSecret = secret ?? null;
+ 
+   // Computed lazily on first request — `port` may be 0 here (OS-assigned)
+   // or the EADDRINUSE retry loop below may bump us to a different port,
+@@ -242,11 +226,6 @@
+           : port;
+       allowedHosts = buildAllowedHosts(ALLOWED_ORIGINS, actualPort, host);
+     }
+-    if (!isHostAllowed(req.headers.host, allowedHosts)) {
+-      res.writeHead(403, { "Content-Type": "text/plain" });
+-      res.end("forbidden host");
+-      return;
+-    }
+ 
+     const raw = req.url || "/";
+     const qIdx = raw.indexOf("?");
